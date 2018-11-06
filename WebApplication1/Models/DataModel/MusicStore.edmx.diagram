@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="35c8d65513b6404c99b815a1140ccfff" Name="Diagram1">
+        <EntityTypeShape EntityType="DataModel.C__MigrationHistory" Width="1.5" PointX="7.125" PointY="0.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="DataModel.Albums" Width="1.5" PointX="2.75" PointY="0.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="DataModel.Artists" Width="1.5" PointX="0.5" PointY="0.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="DataModel.Genres" Width="1.5" PointX="4.875" PointY="0.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="DataModel.Orders" Width="1.5" PointX="9.25" PointY="0.5" IsExpanded="true" />
+        <AssociationConnector Association="DataModel.FK_dbo_Albums_dbo_Artists_ArtistId" ManuallyRouted="false" />
+        <AssociationConnector Association="DataModel.FK_dbo_Albums_dbo_Genres_GenreId" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
