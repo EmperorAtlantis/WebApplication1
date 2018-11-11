@@ -190,6 +190,7 @@
     <Content Include="App_Data\MusicStoreDB-20130929160340_log.ldf">
       <DependentUpon>MusicStoreDB-20130929160340.mdf</DependentUpon>
     </Content>
+    <Content Include="Content\Images\master.jpg" />
     <Content Include="Content\metro-all.css" />
     <Content Include="Content\metro-all.min.css" />
     <Content Include="Content\metro-colors.css" />
@@ -255,6 +256,7 @@
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Scripts\metro.min.js.map" />
+    <Content Include="Views\Shared\_Layout1.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\ServiceModel\" />
@@ -285,7 +287,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>10771</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:10771/</IISUrl>
+          <IISUrl>http://localhost:12345/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

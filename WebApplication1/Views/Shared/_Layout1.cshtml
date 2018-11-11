@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    @RenderSection("head", required: false)
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/metro")
+</head>
+<body>
+    <div class="bg-dark" data-role="appbar" data-expand-point="md">
+        <a href="//Home/Index" class="brand no-hover" style="padding:0px;margin:5px">
+            <img src="~/Content/Images/master.jpg" height="50" width="50"/>
+        </a>
+        <ul class="app-bar-menu ml-auto fg-yellow bg-dark">
+            <li class="bg-lightBlue-hover"><a href="#">Home</a></li>
+            <li class="bg-lightBlue-hover border-none">
+                <a href="#" class="dropdown-toggle" >Products</a>
+                <ul class="v-menu border-none" data-role="dropdown">
+                    <li class="bg-lightBlue-hover bg-dark fg-yellow border-none"><a href="#">Windows 10</a></li>
+                    <li class="bg-lightBlue-hover bg-dark fg-yellow"><a href="#">Office 365</a></li>
+                    <li class="divider bg-yellow"></li>
+                    <li class="bg-lightBlue-hover bg-dark fg-yellow"><a href="#">Skype</a></li>
+                </ul>
+            </li>
+            <li class="bg-lightBlue-hover"><a href="#">Blog</a></li>
+            <li class="bg-lightBlue-hover"><a href="#">Contacts</a></li>
+        </ul>
+    </div>
+    @RenderBody()
+</body>
+</html>
