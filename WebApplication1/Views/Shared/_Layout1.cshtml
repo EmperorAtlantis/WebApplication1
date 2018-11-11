@@ -10,24 +10,44 @@
     @Scripts.Render("~/bundles/metro")
 </head>
 <body>
-    <div class="bg-dark" data-role="appbar" data-expand-point="md">
-        <a href="//Home/Index" class="brand no-hover" style="padding:0px;margin:5px">
-            <img src="~/Content/Images/master.jpg" height="50" width="50"/>
-        </a>
-        <ul class="app-bar-menu ml-auto fg-yellow bg-dark">
-            <li class="bg-lightBlue-hover"><a href="#">Home</a></li>
-            <li class="bg-lightBlue-hover border-none">
-                <a href="#" class="dropdown-toggle" >Products</a>
-                <ul class="v-menu border-none" data-role="dropdown">
-                    <li class="bg-lightBlue-hover bg-dark fg-yellow border-none"><a href="#">Windows 10</a></li>
-                    <li class="bg-lightBlue-hover bg-dark fg-yellow"><a href="#">Office 365</a></li>
-                    <li class="divider bg-yellow"></li>
-                    <li class="bg-lightBlue-hover bg-dark fg-yellow"><a href="#">Skype</a></li>
-                </ul>
-            </li>
-            <li class="bg-lightBlue-hover"><a href="#">Blog</a></li>
-            <li class="bg-lightBlue-hover"><a href="#">Contacts</a></li>
-        </ul>
+    <div style="height:500px; width:500px; margin-top:10px">
+        <aside class="sidebar pos-absolute open z-2" data-role="sidebar" data-toggle="#sidebar-toggle" id="userinfo" >
+            <div class="sidebar-header" data-image="/Content/Images/master.jpg">
+                <a href="/" class="fg-dark sub-action" onclick="Metro.sidebar.close('#userinfo'); return false;"><span class="mif-arrow-left mif-2x"></span></a>
+                <div class="avatar">
+                    <img data-role="gravatar" data-email="sergey@pimenov.com.ua">
+                </div>
+                <span class="title fg-white">Metro 4 Components Library</span>
+                <span class="subtitle fg-white"> 2018 © Sergey Pimenov</span>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a><span class="mif-home icon"></span>Home</a></li>
+                <li><a><span class="mif-books icon"></span>Guide</a></li>
+                <li><a><span class="mif-files-empty icon"></span>Examples</a></li>
+                <li class="divider"></li>
+                <li><a><span class="mif-images icon"></span>Icons</a></li>
+            </ul>
+        </aside>
+        <div class="bg-dark" data-role="appbar" data-expand-point="md">
+            <button class="app-bar-item c-pointer" id="sidebar-toggle"><span class="mif-menu fg-white"></span></button>
+            <a href="//Home/Index" class="brand no-hover" style="padding:0px;margin:5px">
+                <img src="~/Content/Images/master.jpg" height="50" width="50" />
+            </a>
+            <ul class="app-bar-menu ml-auto fg-blue bg-dark text-bold">
+                <li class="bg-lightYellow-hover fg-darkBlue-hover"><a href="#">Home</a></li>
+                <li class="bg-lightYellow-hover border-none">
+                    <a href="#" class="dropdown-toggle fg-darkBlue-hover">Products</a>
+                    <ul class="v-menu border-none fg-blue border bd-dark" data-role="dropdown">
+                        <li class="bg-dark bg-lightYellow-hover border-none fg-darkBlue-hover"><a href="#">Windows 10</a></li>
+                        <li class="bg-dark bg-lightYellow-hover fg-darkBlue-hover"><a href="#">Office 365</a></li>
+                        <li class="divider bg-yellow"></li>
+                        <li class="bg-dark bg-lightYellow-hover fg-darkBlue-hover"><a href="#">Skype</a></li>
+                    </ul>
+                </li>
+                <li class="bg-lightYellow-hover fg-darkBlue-hover"><a href="#">Blog</a></li>
+                <li class="bg-lightYellow-hover fg-darkBlue-hover"><a href="#">Contacts</a></li>
+            </ul>
+            </div>
     </div>
     @RenderBody()
 </body>

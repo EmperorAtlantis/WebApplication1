@@ -186,10 +186,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Data\MusicStoreDB-20130929160340.mdf" />
-    <Content Include="App_Data\MusicStoreDB-20130929160340_log.ldf">
-      <DependentUpon>MusicStoreDB-20130929160340.mdf</DependentUpon>
-    </Content>
     <Content Include="Content\Images\master.jpg" />
     <Content Include="Content\metro-all.css" />
     <Content Include="Content\metro-all.min.css" />
@@ -257,8 +253,10 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Scripts\metro.min.js.map" />
     <Content Include="Views\Shared\_Layout1.cshtml" />
+    <Content Include="Views\Shared\_Layout2.cshtml" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="App_Data\" />
     <Folder Include="Models\ServiceModel\" />
   </ItemGroup>
   <ItemGroup>
