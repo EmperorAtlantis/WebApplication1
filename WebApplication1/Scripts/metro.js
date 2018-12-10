@@ -1,5 +1,5 @@
 /*
- * Metro 4 Components Library v4.2.27 build 705 (https://metroui.org.ua)
+ * Metro 4 Components Library v4.2.30 build 709 (https://metroui.org.ua)
  * Copyright 2018 Sergey Pimenov
  * Licensed under MIT
  */
@@ -100,8 +100,8 @@ var isTouch = (('ontouchstart' in window) || (navigator.MaxTouchPoints > 0) || (
 
 var Metro = {
 
-    version: "4.2.27",
-    versionFull: "4.2.27.705 ",
+    version: "4.2.30",
+    versionFull: "4.2.30.709 ",
     isTouchable: isTouch,
     fullScreenEnabled: document.fullscreenEnabled,
     sheet: null,
@@ -351,9 +351,11 @@ var Metro = {
         if (METRO_CLOAK_REMOVE !== "fade") {
             $(".m4-cloak").removeClass("m4-cloak");
         } else {
-            $(".m4-cloak").fadeIn(METRO_CLOAK_DURATION, function(){
+            $(".m4-cloak").animate({
+                opacity: 1
+            }, METRO_CLOAK_REMOVE, function(){
                 $(".m4-cloak").removeClass("m4-cloak");
-            });
+            })
         }
 
         return this;
@@ -4114,6 +4116,14 @@ var d = new Date().getTime();
         return Number(parseFloat(val.replace(/[^0-9-.]/g, '')));
     },
 
+    parseCard: function(val){
+        return val.replace(/[^0-9]/g, '');
+    },
+
+    parsePhone: function(val){
+        return Utils.parseCard(val);
+    },
+
     isVisible: function(el){
         if (Utils.isJQueryObject(el)) {
             el = el[0];
@@ -4187,35 +4197,72 @@ var d = new Date().getTime();
         return (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "")
     },
 
-    iframeBubbleMouseMove: function(iframe){
-        if (Utils.isJQueryObject(iframe)) {
-            iframe = iframe[0];
+    formData: function(form){
+        if (Utils.isNull(form)) {
+            return ;
         }
-        var existingOnMouseMove = iframe.contentWindow.onmousemove;
-        iframe.contentWindow.onmousemove = function(e){
-            if(existingOnMouseMove) existingOnMouseMove(e);
-            var evt = document.createEvent("MouseEvents");
-            var boundingClientRect = iframe.getBoundingClientRect();
-            evt.initMouseEvent(
-                "mousemove",
-                true,
-                false,
-                window,
-                e.detail,
-                e.screenX,
-                e.screenY,
-                e.clientX + boundingClientRect.left,
-                e.clientY + boundingClientRect.top,
-                e.ctrlKey,
-                e.altKey,
-                e.shiftKey,
-                e.metaKey,
-                e.button,
-                null
-            );
-
-            iframe.dispatchEvent(evt);
-        };
+        if (Utils.isJQueryObject(form)) {
+            form = form[0];
+        }
+        if (!form || form.nodeName !== "FORM") {
+            return;
+        }
+        var i, j, q = {};
+        for (i = form.elements.length - 1; i >= 0; i = i - 1) {
+            if (form.elements[i].name === "") {
+                continue;
+            }
+            switch (form.elements[i].nodeName) {
+                case 'INPUT':
+                    switch (form.elements[i].type) {
+                        case 'text':
+                        case 'hidden':
+                        case 'password':
+                        case 'button':
+                        case 'reset':
+                        case 'submit':
+                            q[form.elements[i].name] = form.elements[i].value;
+                            break;
+                        case 'checkbox':
+                        case 'radio':
+                            if (form.elements[i].checked) {
+                                q[form.elements[i].name] = form.elements[i].value;
+                            }
+                            break;
+                    }
+                    break;
+                case 'file':
+                    break;
+                case 'TEXTAREA':
+                    q[form.elements[i].name] = form.elements[i].value;
+                    break;
+                case 'SELECT':
+                    switch (form.elements[i].type) {
+                        case 'select-one':
+                            q[form.elements[i].name] = form.elements[i].value;
+                            break;
+                        case 'select-multiple':
+                            q[form.elements[i].name] = [];
+                            for (j = form.elements[i].options.length - 1; j >= 0; j = j - 1) {
+                                if (form.elements[i].options[j].selected) {
+                                    q[form.elements[i].name].push(form.elements[i].options[j].value);
+                                }
+                            }
+                            break;
+                    }
+                    break;
+                case 'BUTTON':
+                    switch (form.elements[i].type) {
+                        case 'reset':
+                        case 'submit':
+                        case 'button':
+                            q[form.elements[i].name] = form.elements[i].value;
+                            break;
+                    }
+                    break;
+            }
+        }
+        return q;
     }
 };
 
@@ -6587,7 +6634,7 @@ var CalendarPicker = {
     },
 
     toggleState: function(){
-        if (this.element.data("disabled") === false) {
+        if (this.elem.disabled) {
             this.disable();
         } else {
             this.enable();
@@ -6734,6 +6781,8 @@ var Carousel = {
         onMouseLeave: Metro.noop,
         onNextClick: Metro.noop,
         onPrevClick: Metro.noop,
+        onSlideShow: Metro.noop,
+        onSlideHide: Metro.noop,
         onCarouselCreate: Metro.noop
     },
 
@@ -7100,6 +7149,14 @@ var Carousel = {
             case 'fade': Animation['fade'](current, next, duration, effectFunc); break;
             default: Animation['switch'](current, next);
         }
+
+        setTimeout(function(){
+            Utils.exec(o.onSlideShow, [next[0]], element[0]);
+        }, duration);
+
+        setTimeout(function(){
+            Utils.exec(o.onSlideHide, [current[0]], element[0]);
+        }, duration);
 
         if (interval === true) {
 
@@ -7469,7 +7526,7 @@ var Checkbox = {
     },
 
     toggleState: function(){
-        if (this.element.data("disabled") === false) {
+        if (this.elem.disabled) {
             this.disable();
         } else {
             this.enable();
@@ -10275,7 +10332,7 @@ var File = {
     },
 
     toggleState: function(){
-        if (this.element.data("disabled") === false) {
+        if (this.elem.disabled) {
             this.disable();
         } else {
             this.enable();
@@ -11502,7 +11559,7 @@ var MaterialInput = {
     },
 
     toggleState: function(){
-        if (this.element.data("disabled") === false) {
+        if (this.elem.disabled) {
             this.disable();
         } else {
             this.enable();
@@ -11901,7 +11958,7 @@ var Input = {
     },
 
     toggleState: function(){
-        if (this.element.data("disabled") === false) {
+        if (this.elem.disabled) {
             this.disable();
         } else {
             this.enable();
@@ -12279,7 +12336,7 @@ var Keypad = {
     },
 
     toggleState: function(){
-        if (this.element.data("disabled") === false) {
+        if (this.elem.disabled) {
             this.disable();
         } else {
             this.enable();
@@ -12931,6 +12988,8 @@ var List = {
                 case "integer": data = parseInt(data); break;
                 case "float": data = parseFloat(data); break;
                 case "money": data = Utils.parseMoney(data); break;
+                case "card": data = Utils.parseCard(data); break;
+                case "phone": data = Utils.parsePhone(data); break;
             }
         }
 
@@ -12939,11 +12998,12 @@ var List = {
 
     deleteItem: function(value){
         var i, deleteIndexes = [], item;
+        var is_func = Utils.isFunc(value);
 
         for (i = 0; i < this.items.length; i++) {
             item = this.items[i];
 
-            if (Utils.isFunc(value)) {
+            if (is_func) {
                 if (Utils.exec(value, [item])) {
                     deleteIndexes.push(i);
                 }
@@ -14093,6 +14153,10 @@ var Notify = {
         var notify, that = this, o = this.options;
         var m, t;
 
+        if (Utils.isNull(options)) {
+            options = {};
+        }
+
         if (!Utils.isValue(message)) {
             return false;
         }
@@ -14135,11 +14199,14 @@ var Notify = {
             Utils.exec(Utils.isValue(options.onAppend) ? options.onAppend : o.onAppend, null, notify[0]);
 
             notify.css({
-                marginTop: o.distance
+                marginTop: Utils.isValue(options.onAppend) ? options.distance : o.distance
             }).fadeIn(100, function(){
+                var duration = Utils.isValue(options.duration) ? options.duration : o.duration;
+                var animation = Utils.isValue(options.animation) ? options.animation : o.animation;
+
                 notify.animate({
                     marginTop: ".25rem"
-                }, o.duration, o.animation, function(){
+                }, duration, animation, function(){
 
                     Utils.exec(o.onNotifyCreate, null, this);
 
@@ -14361,7 +14428,7 @@ var Popover = {
     },
 
     _setOptionsFromDOM: function(){
-        var that = this, element = this.element, o = this.options;
+        var element = this.element, o = this.options;
 
         $.each(element.data(), function(key, value){
             if (key in o) {
@@ -14375,7 +14442,6 @@ var Popover = {
     },
 
     _create: function(){
-        var that = this, element = this.element, o = this.options;
 
         this._createEvents();
 
@@ -14397,6 +14463,9 @@ var Popover = {
             }
             setTimeout(function(){
                 that.createPopover();
+
+                Utils.exec(o.onPopoverShow, [that.popover], element[0]);
+
                 if (o.popoverHide > 0) {
                     setTimeout(function(){
                         that.removePopover();
@@ -14452,6 +14521,7 @@ var Popover = {
         var popover;
         var neb_pos;
         var id = Utils.elementId("popover");
+        var closeButton;
 
         if (this.popovered) {
             return ;
@@ -14463,7 +14533,10 @@ var Popover = {
         $("<div>").addClass("popover-content").addClass(o.clsPopoverContent).html(o.popoverText).appendTo(popover);
 
         if (o.popoverHide === 0 && o.closeButton === true) {
-            $("<button>").addClass("button square small popover-close-button bg-white").html("&times;").appendTo(popover);
+            closeButton = $("<button>").addClass("button square small popover-close-button bg-white").html("&times;").appendTo(popover);
+            closeButton.on(Metro.events.click, function(){
+                that.removePopover();
+            });
         }
 
         switch (o.popoverPosition) {
@@ -14474,9 +14547,12 @@ var Popover = {
         }
 
         popover.addClass(neb_pos);
-        popover.on(Metro.events.click, function(){
-            that.removePopover();
-        });
+
+        if (o.closeButton !== true) {
+            popover.on(Metro.events.click, function(){
+                that.removePopover();
+            });
+        }
 
         this.popover = popover;
         this.size = Utils.hiddenElementSize(popover);
@@ -14501,7 +14577,7 @@ var Popover = {
         var timeout = this.options.onPopoverHide === Metro.noop ? 0 : 300;
         var popover = this.popover;
 
-        if (!popovered) {
+        if (!this.popovered) {
             return ;
         }
 
@@ -14518,6 +14594,7 @@ var Popover = {
 
     show: function(){
         var that = this, element = this.element, o = this.options;
+
         if (this.popovered === true) {
             return ;
         }
@@ -14525,7 +14602,7 @@ var Popover = {
         setTimeout(function(){
             that.createPopover();
 
-            Utils.exec(o.onPopoverShow, [popover], element[0]);
+            Utils.exec(o.onPopoverShow, [that.popover], element[0]);
 
             if (o.popoverHide > 0) {
                 setTimeout(function(){
@@ -14814,7 +14891,7 @@ var Radio = {
     },
 
     toggleState: function(){
-        if (this.element.data("disabled") === false) {
+        if (this.elem.disabled) {
             this.disable();
         } else {
             this.enable();
@@ -14995,6 +15072,12 @@ var Rating = {
             }
         }
 
+        if (element.is(":disabled")) {
+            this.disable();
+        } else {
+            this.enable();
+        }
+
         this.rating = rating;
     },
 
@@ -15086,10 +15169,29 @@ var Rating = {
         this.static(isStatic);
     },
 
+    disable: function(){
+        this.element.data("disabled", true);
+        this.element.parent().addClass("disabled");
+    },
+
+    enable: function(){
+        this.element.data("disabled", false);
+        this.element.parent().removeClass("disabled");
+    },
+
+    toggleState: function(){
+        if (this.elem.disabled) {
+            this.disable();
+        } else {
+            this.enable();
+        }
+    },
+
     changeAttribute: function(attributeName){
         switch (attributeName) {
             case "value":
             case "data-value": this.changeAttributeValue(attributeName); break;
+            case "disabled": this.toggleState(); break;
             case "data-message": this.changeAttributeMessage(); break;
             case "data-static": this.changeAttributeStatic(); break;
         }
@@ -15788,7 +15890,7 @@ var Select = {
     },
 
     toggleState: function(){
-        if (this.element.data("disabled") === false) {
+        if (this.elem.disabled) {
             this.disable();
         } else {
             this.enable();
@@ -16313,6 +16415,12 @@ var Slider = {
             }
         }
 
+        if (element.is(":disabled")) {
+            this.disable();
+        } else {
+            this.enable();
+        }
+
         this.slider = slider;
     },
 
@@ -16631,10 +16739,29 @@ var Slider = {
         this.buff(val);
     },
 
+    disable: function(){
+        this.element.data("disabled", true);
+        this.element.parent().addClass("disabled");
+    },
+
+    enable: function(){
+        this.element.data("disabled", false);
+        this.element.parent().removeClass("disabled");
+    },
+
+    toggleState: function(){
+        if (this.elem.disabled) {
+            this.disable();
+        } else {
+            this.enable();
+        }
+    },
+
     changeAttribute: function(attributeName){
         switch (attributeName) {
             case "data-value": this.changeValue(); break;
             case "data-buffer": this.changeBuffer(); break;
+            case 'disabled': this.toggleState(); break;
         }
     }
 };
@@ -16735,7 +16862,9 @@ var Sorter = {
                 case "number": data = Number(data); break;
                 case "int": data = parseInt(data); break;
                 case "float": data = parseFloat(data); break;
-                case "money": data = Number(parseFloat(data.replace(/[^0-9-.]/g, ''))); break;
+                case "money": data = Utils.parseMoney(data); break;
+                case "card": data = Utils.parseCard(data); break;
+                case "phone": data = Utils.parsePhone(data); break;
             }
         }
 
@@ -17086,13 +17215,12 @@ var Spinner = {
     },
 
     toggleState: function(){
-        if (this.element.data("disabled") === false) {
+        if (this.elem.disabled) {
             this.disable();
         } else {
             this.enable();
         }
     },
-
 
     changeAttribute: function(attributeName){
         var that = this, element = this.element;
@@ -17219,6 +17347,7 @@ var Splitter = {
                 children_sizes = Utils.strToArray(o.minSizes);
                 for (i = 0; i < children_sizes.length; i++) {
                     $(children[i]).data("min-size", children_sizes[i]);
+                    children[i].style.setProperty('min-'+resizeProp, String(children_sizes[i]).contains("%") ? children_sizes[i] : String(children_sizes[i]).replace("px", "")+"px", 'important');
                 }
             } else {
                 $.each(children, function(){
@@ -17247,6 +17376,9 @@ var Splitter = {
 
             gutter.addClass("active");
 
+            prev_block.addClass("stop-select stop-pointer");
+            next_block.addClass("stop-select stop-pointer");
+
             Utils.exec(o.onResizeStart, [start_pos, gutter, prev_block, next_block], element);
 
             $(window).on(Metro.events.move + "-" + element.attr("id"), function(e){
@@ -17267,6 +17399,9 @@ var Splitter = {
             });
 
             $(window).on(Metro.events.stop + "-" + element.attr("id"), function(e){
+
+                prev_block.removeClass("stop-select stop-pointer");
+                next_block.removeClass("stop-select stop-pointer");
 
                 that._saveSize();
 
@@ -17303,9 +17438,6 @@ var Splitter = {
         if (o.saveState === true && storage !== null) {
 
             itemsSize = storage.getItem(this.storageKey + element.attr("id"));
-
-            console.log(this.storageKey + element.attr("id"));
-            console.log(itemsSize);
 
             $.each(element.children(".split-block"), function(i, v){
                 var item = $(v);
@@ -18163,7 +18295,7 @@ var Switch = {
     },
 
     toggleState: function(){
-        if (this.element.data("disabled") === false) {
+        if (this.elem.disabled) {
             this.disable();
         } else {
             this.enable();
@@ -18239,6 +18371,7 @@ var Table = {
         clsDelButton: "",
         clsAddButton: "",
 
+        horizontalScroll: false,
         check: false,
         checkType: "checkbox",
         checkStyle: 1,
@@ -18296,6 +18429,7 @@ var Table = {
         cellWrapper: true,
 
         clsComponent: "",
+        clsTableContainer: "",
         clsTable: "",
 
         clsHead: "",
@@ -18760,9 +18894,6 @@ var Table = {
                 classes.push("hidden");
             }
 
-            if (item.type === 'rowcheck') {classes.push("check-cell");}
-            if (item.type === 'rownum') {classes.push("rownum-cell");}
-
             classes.push(o.clsHeadCell);
 
             if (Utils.bool(view[cell_index]['show'])) {
@@ -18831,7 +18962,7 @@ var Table = {
 
     _createTopBlock: function (){
         var that = this, element = this.element, o = this.options;
-        var top_block = $("<div>").addClass("table-top").addClass(o.clsTableTop).insertBefore(element);
+        var top_block = $("<div>").addClass("table-top").addClass(o.clsTableTop).insertBefore(element.parent());
         var search_block, search_input, rows_block, rows_select;
 
         search_block = Utils.isValue(this.wrapperSearch) ? this.wrapperSearch : $("<div>").addClass("table-search-block").addClass(o.clsSearch).appendTo(top_block);
@@ -18879,7 +19010,7 @@ var Table = {
 
     _createBottomBlock: function (){
         var element = this.element, o = this.options;
-        var bottom_block = $("<div>").addClass("table-bottom").addClass(o.clsTableBottom).insertAfter(element);
+        var bottom_block = $("<div>").addClass("table-bottom").addClass(o.clsTableBottom).insertAfter(element.parent());
         var info, pagination;
 
         info = Utils.isValue(this.wrapperInfo) ? this.wrapperInfo : $("<div>").addClass("table-info").addClass(o.clsTableInfo).appendTo(bottom_block);
@@ -18897,7 +19028,7 @@ var Table = {
 
     _createStructure: function(){
         var that = this, element = this.element, o = this.options;
-        var table_component, columns;
+        var table_container, table_component, columns;
         var w_search = $(o.searchWrapper), w_info = $(o.infoWrapper), w_rows = $(o.rowsWrapper), w_paging = $(o.paginationWrapper);
 
         if (w_search.length > 0) {this.wrapperSearch = w_search;}
@@ -18905,11 +19036,14 @@ var Table = {
         if (w_rows.length > 0) {this.wrapperRows = w_rows;}
         if (w_paging.length > 0) {this.wrapperPagination = w_paging;}
 
-        if (!element.parent().hasClass("table-component")) {
-            table_component = $("<div>").addClass("table-component").insertBefore(element);
-            element.appendTo(table_component);
-        } else {
-            table_component = element.parent();
+        table_component = $("<div>").addClass("table-component");
+        table_component.insertBefore(element);
+
+        table_container = $("<div>").addClass("table-container").addClass(o.clsTableContainer).appendTo(table_component);
+        element.appendTo(table_container);
+
+        if (o.horizontalScroll === true) {
+            table_container.addClass("horizontal-scroll");
         }
 
         table_component.addClass(o.clsComponent);
@@ -18975,7 +19109,7 @@ var Table = {
 
     _createEvents: function(){
         var that = this, element = this.element, o = this.options;
-        var component = element.parent();
+        var component = element.closest(".table-component");
         var search = component.find(".table-search-block input");
         var customSearch;
         var id = element.attr("id");
@@ -19284,7 +19418,7 @@ var Table = {
 
     _info: function(start, stop, length){
         var element = this.element, o = this.options;
-        var component = element.parent();
+        var component = element.closest(".table-component");
         var info = Utils.isValue(this.wrapperInfo) ? this.wrapperInfo : component.find(".table-info");
         var text;
 
@@ -19309,7 +19443,7 @@ var Table = {
 
     _paging: function(length){
         var that = this, element = this.element, o = this.options;
-        var component = element.parent();
+        var component = element.closest(".table-component");
         var pagination_wrapper = Utils.isValue(this.wrapperPagination) ? this.wrapperPagination : component.find(".table-pagination");
         var i, prev, next;
         var shortDistance = 5;
@@ -19424,11 +19558,11 @@ var Table = {
                 if (that.searchFields.length > 0) {
                     $.each(that.heads, function(i, v){
                         if (that.searchFields.indexOf(v.name) > -1) {
-                            row_data += ""+row[i];
+                            row_data += "•"+row[i];
                         }
                     })
                 } else {
-                    row_data = row.join("");
+                    row_data = row.join("•");
                 }
 
                 row_data = row_data.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim().toLowerCase();
@@ -19615,6 +19749,8 @@ var Table = {
                 case "int": result = parseInt(result); break;
                 case "float": result = parseFloat(result); break;
                 case "money": result = Utils.parseMoney(result); break;
+                case "card": result = Utils.parseCard(result); break;
+                case "phone": result = Utils.parsePhone(result); break;
             }
         }
 
@@ -19623,8 +19759,9 @@ var Table = {
 
     deleteItem: function(fieldIndex, value){
         var i, deleteIndexes = [];
+        var is_func = Utils.isFunc(value);
         for(i = 0; i < this.items.length; i++) {
-            if (Utils.isFunc(value)) {
+            if (is_func) {
                 if (Utils.exec(value, [this.items[i][fieldIndex]])) {
                     deleteIndexes.push(i);
                 }
@@ -19642,6 +19779,7 @@ var Table = {
 
     deleteItemByName: function(fieldName, value){
         var i, fieldIndex, deleteIndexes = [];
+        var is_func = Utils.isFunc(value);
 
         for(i = 0; i < this.heads.length; i++) {
             if (this.heads[i]['name'] === fieldName) {
@@ -19651,7 +19789,7 @@ var Table = {
         }
 
         for(i = 0; i < this.items.length; i++) {
-            if (Utils.isFunc(value)) {
+            if (is_func) {
                 if (Utils.exec(value, [this.items[i][fieldIndex]])) {
                     deleteIndexes.push(i);
                 }
@@ -20303,6 +20441,7 @@ var Tabs = {
         expand: false,
         expandPoint: null,
         tabsPosition: "top",
+        tabsType: "default",
 
         clsTabs: "",
         clsTabsList: "",
@@ -20352,6 +20491,9 @@ var Tabs = {
         container.addClass(o.tabsPosition.replace(["-", "_", "+"], " "));
 
         element.addClass("tabs-list");
+        if (o.tabsType !== "default") {
+            element.addClass("tabs-"+o.tabsType);
+        }
         if (!right_parent) {
             container.insertBefore(element);
             element.appendTo(container);
@@ -20620,6 +20762,12 @@ var TagInput = {
                 that._addTag(this);
             })
         }
+
+        if (element.is(":disabled")) {
+            this.disable();
+        } else {
+            this.enable();
+        }
     },
 
     _createEvents: function(){
@@ -20761,6 +20909,24 @@ var TagInput = {
         container.find(".tag").remove();
     },
 
+    disable: function(){
+        this.element.data("disabled", true);
+        this.element.parent().addClass("disabled");
+    },
+
+    enable: function(){
+        this.element.data("disabled", false);
+        this.element.parent().removeClass("disabled");
+    },
+
+    toggleState: function(){
+        if (this.elem.disabled) {
+            this.disable();
+        } else {
+            this.enable();
+        }
+    },
+
     changeAttribute: function(attributeName){
         var that = this, element = this.element, o = this.options;
 
@@ -20775,6 +20941,7 @@ var TagInput = {
 
         switch (attributeName) {
             case "value": changeValue(); break;
+            case "disabled": this.toggleState(); break;
         }
     },
 
@@ -20981,7 +21148,7 @@ var Textarea = {
     },
 
     toggleState: function(){
-        if (this.element.data("disabled") === false) {
+        if (this.elem.disabled) {
             this.disable();
         } else {
             this.enable();
@@ -21693,16 +21860,45 @@ $(document).on(Metro.events.click, function(e){
 
 // Source: js/plugins/toast.js
 var Toast = {
+
+    options: {
+        callback: Metro.noop,
+        timeout: METRO_TIMEOUT,
+        distance: 20,
+        showTop: false,
+        clsToast: ""
+    },
+
+    init: function(options){
+        this.options = $.extend({}, this.options, options);
+
+        return this;
+    },
+
     create: function(message, callback, timeout, cls){
+        var o = this.options;
         var toast = $("<div>").addClass("toast").html(message).appendTo($("body")).hide();
         var width = toast.outerWidth();
         var timer = null;
-        timeout = timeout || METRO_TIMEOUT;
+
+        timeout = timeout || o.timeout;
+        callback = callback || o.callback;
+        cls = cls || o.clsToast;
+
+        if (o.showTop === true) {
+            toast.addClass("show-top").css({
+                top: o.distance
+            });
+        } else {
+            toast.css({
+                bottom: o.distance
+            })
+        }
 
         toast.css({
             'left': '50%',
             'margin-left': -(width / 2)
-        }).addClass(cls).fadeIn(METRO_ANIMATION_DURATION);
+        }).addClass(o.clsToast).addClass(cls).fadeIn(METRO_ANIMATION_DURATION);
 
         timer = setTimeout(function(){
             timer = null;
@@ -21714,7 +21910,7 @@ var Toast = {
     }
 };
 
-Metro['toast'] = Toast;
+Metro['toast'] = Toast.init();
 
 // Source: js/plugins/touch.js
 var TouchConst = {
@@ -23383,7 +23579,6 @@ var Validator = {
         this.element = $(elem);
         this._onsubmit = null;
         this._onreset = null;
-        this._action = null;
         this.result = [];
 
         this._setOptionsFromDOM();
@@ -23399,6 +23594,7 @@ var Validator = {
         interactiveCheck: false,
         clearInvalid: 0,
         requiredMode: true,
+        useRequiredClass: true,
         onBeforeSubmit: Metro.noop_true,
         onSubmit: Metro.noop,
         onError: Metro.noop,
@@ -23426,17 +23622,15 @@ var Validator = {
         var that = this, element = this.element, o = this.options;
         var inputs = element.find("[data-validate]");
 
-        this._action = element[0].action;
-
         element
-            .attr("novalidate", 'novalidate')
-            .attr("action", "javascript:");
+            .attr("novalidate", 'novalidate');
+            //.attr("action", "javascript:");
 
         $.each(inputs, function(){
             var input = $(this);
             var funcs = input.data("validate");
             var required = funcs.indexOf("required") > -1;
-            if (required) {
+            if (required && o.useRequiredClass === true) {
                 if (ValidatorFuncs.is_control(input)) {
                     input.parent().addClass("required");
                 } else {
@@ -23488,6 +23682,7 @@ var Validator = {
             val: 0,
             log: []
         };
+        var formData = Utils.formData(element);
 
         $.each(inputs, function(){
             ValidatorFuncs.validate(this, result, o.onValidate, o.onError, o.requiredMode);
@@ -23495,18 +23690,16 @@ var Validator = {
 
         submit.removeAttr("disabled").removeClass("disabled");
 
-        element[0].action = this._action;
-
-        result.val += Utils.exec(o.onBeforeSubmit, [element], this.elem) === false ? 1 : 0;
+        result.val += Utils.exec(o.onBeforeSubmit, [element, formData], this.elem) === false ? 1 : 0;
 
         if (result.val === 0) {
-            Utils.exec(o.onValidateForm, [element], form);
+            Utils.exec(o.onValidateForm, [element, formData], form);
             setTimeout(function(){
-                Utils.exec(o.onSubmit, [element], form);
+                Utils.exec(o.onSubmit, [element, formData], form);
                 if (that._onsubmit !==  null) Utils.exec(that._onsubmit, null, form);
             }, o.submitTimeout);
         } else {
-            Utils.exec(o.onErrorForm, [result.log, element], form);
+            Utils.exec(o.onErrorForm, [result.log, element, formData], form);
             if (o.clearInvalid > 0) {
                 setTimeout(function(){
                     $.each(inputs, function(){
